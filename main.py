@@ -5,6 +5,7 @@ from typing import List
 import shutil
 import os
 from src.util.process_pdf import process_pdf
+from src.util.fill_excel import fill_excel
 
 app = FastAPI()
 
@@ -42,6 +43,8 @@ async def upload_files(files: List[UploadFile] = File(...)):
             os.remove(temp_file_path)
         shutil.move(file_path, temp_file_path)
 
+    print(len(results),"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+    fill_excel(results)
     # Eliminar el directorio temporal solo si está vacío
     if os.path.exists(temp_dir) and not os.listdir(temp_dir):
         os.rmdir(temp_dir)
