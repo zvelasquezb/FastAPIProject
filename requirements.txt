@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+jinja2
+camelot-py[cv]
+pandas
+matplotlib
+pypdf
+openpyxl

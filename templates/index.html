@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Processor</title>
+    <style>
+        body { font-family: sans-serif; }
+        #results { margin-top: 20px; }
+        .result { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Upload PDFs to Process</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="files" name="files" multiple accept=".pdf">
+        <button type="submit">Process</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const filesInput = document.getElementById('files');
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = 'Processing...';
+
+            const formData = new FormData();
+            for (const file of filesInput.files) {
+                formData.append('files', file);
+            }
+
+            try {
+                const response = await fetch('/upload/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const results = await response.json();
+                    resultsDiv.innerHTML = '';
+                    results.results.forEach(result => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        let content = `<h2>${result.filename}</h2>`;
+                        if (result.error) {
+                            content += `<p><strong>Error:</strong> ${result.error}</p>`;
+                        } else {
+                            content += '<ul>';
+                            for (const key in result.data) {
+                                content += `<li><strong>${key}:</strong> ${result.data[key]}</li>`;
+                            }
+                            content += '</ul>';
+                        }
+                        resultDiv.innerHTML = content;
+                        resultsDiv.appendChild(resultDiv);
+                    });
+                } else {
+                    const error = await response.json();
+                    resultsDiv.innerHTML = `Error: ${error.detail}`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
