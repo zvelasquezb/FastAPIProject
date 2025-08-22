@@ -25,14 +25,25 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
     for file in files:
         file_path = os.path.join(temp_dir, file.filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
         try:
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            
             data = process_pdf(pdf_path=file_path)
             results.append({"filename": file.filename, "data": data})
+
         except Exception as e:
             results.append({"filename": file.filename, "error": str(e)})
+        finally:
+            # Move the file to a temporary location to be deleted later
+            if os.path.exists(file_path):
+                temp_file_path = os.path.join("temp_pdf", f"deletable_{file.filename}")
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        shutil.move(file_path, temp_file_path)
 
-    shutil.rmtree(temp_dir)
+    # Eliminar el directorio temporal solo si está vacío
+    if os.path.exists(temp_dir) and not os.listdir(temp_dir):
+        os.rmdir(temp_dir)
+        
     return JSONResponse(content={"results": results})

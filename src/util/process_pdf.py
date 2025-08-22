@@ -14,6 +14,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from pypdf import PdfReader
+import gc
 
 def formatear_numero(numero):
   """
@@ -72,21 +73,26 @@ def process_pdf(activar_visualizacion = False,pdf_path=""):
     Función principal que orquesta la extracción de tablas del PDF.
     """
     # --- CONFIGURACIÓN ---
-    if pdf_path == "":
-      raise Exception("Debe especificar la ruta del archivo PDF.")
-    reader = PdfReader(pdf_path)
+    if not pdf_path:
+        raise Exception("Debe especificar la ruta del archivo PDF.")
 
-    number_of_pages = len(reader.pages)
-    print(f"El archivo '{pdf_path}' tiene {number_of_pages} páginas.")
     if not os.path.exists(pdf_path):
         print(f"Error: El archivo '{pdf_path}' no se encontró.")
+        return
+
+    try:
+        with PdfReader(pdf_path) as reader:
+            number_of_pages = len(reader.pages)
+            print(f"El archivo '{pdf_path}' tiene {number_of_pages} páginas.")
+    except Exception as e:
+        print(f"Error al leer el archivo PDF con pypdf: {e}")
         return
 
     # --- Configuraciones para cada tabla ---
     bancolombia_config_resumen = {
         "title": "Tabla de Resumen",
         "page": '1',
-        "area": ['0,450,600,505'],
+        "area": ['0,500,600,450'],
         "columns": ['110,190,300,410,490']
     }
     bancolombia_config_movimientos = {
