@@ -183,3 +183,6 @@ def fill_excel(results):
             escribir_en_excel(r'src\template_excel\Inf SIVICOF_PLANTILLA.xlsx',"14233 CB-0115  INFORME SOBR...", str(movimiento_de_egresos_en_pesos[0]+str(movimiento_de_egresos_en_pesos[1])), results[length]['data']['TOTAL CARGOS'])
             escribir_en_excel(r'src\template_excel\Inf SIVICOF_PLANTILLA.xlsx',"14233 CB-0115  INFORME SOBR...", str(saldo_en_pesos_al_final_de_mes_segun_tesoreria[0]+str(saldo_en_pesos_al_final_de_mes_segun_tesoreria[1])), results[length]['data']['SALDO ACTUAL'])
             escribir_en_excel(r'src\template_excel\Inf SIVICOF_PLANTILLA.xlsx',"14233 CB-0115  INFORME SOBR...", str(valor_de_movimiento_maximo_en_el_mes_en_pesos[0]+str(valor_de_movimiento_maximo_en_el_mes_en_pesos[1])), results[length]['data']['Valor de movimiento maximo en el mes en pesos'])
+        
+    output_path = r"src/template_excel/Inf SIVICOF_PLANTILLA.xlsx"
+    return output_path

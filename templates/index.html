@@ -4,27 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Processor</title>
-    <style>
-        body { font-family: sans-serif; }
-        #results { margin-top: 20px; }
-        .result { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">    
 </head>
 <body>
-    <h1>Upload PDFs to Process</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <label for="files">Selecciona un archivo</label>
-        <input type="file" id="files" name="files" multiple accept=".pdf">
-        <button type="submit">Process</button>
-    </form>
+    <div>
+        <h1>Subir PDFs a procesar</h1><br />
+        <form id="upload-form" enctype="multipart/form-data">
+            <label for="files">Selecciona un archivo</label><br />
+            <input type="file" id="files" name="files" multiple accept=".pdf"><br /><br />
+            <button class="select-btn" id="process-btn" type="submit" disabled>Procesar</button>
+            <button class="select-btn" id="download-excel" type="button" disabled>Descargar Excel</button>
+        </form>
 
-    <div id="results"></div>
+        <div id="results"></div>
+    </div>
+
+    
 
     <script>
+
+        const filesInput = document.getElementById('files');
+        const processBtn = document.getElementById('process-btn');
+        const downloadBtn = document.getElementById('download-excel');
+        const resultsDiv = document.getElementById('results');
+
+        // Habilitar el botón "Procesar" solo si hay archivos seleccionados
+        filesInput.addEventListener('change', () => {
+            processBtn.disabled = filesInput.files.length === 0;
+        });
+
         document.getElementById('upload-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-            const filesInput = document.getElementById('files');
-            const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = 'Processing...';
 
             const formData = new FormData();
@@ -57,12 +70,36 @@
                         resultDiv.innerHTML = content;
                         resultsDiv.appendChild(resultDiv);
                     });
+
+                     // Activar botón "Descargar Excel" solo después de procesar
+                    downloadBtn.disabled = false;
                 } else {
                     const error = await response.json();
                     resultsDiv.innerHTML = `Error: ${error.detail}`;
                 }
             } catch (error) {
                 resultsDiv.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        document.getElementById('download-excel').addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/download-excel/');
+                if (!response.ok) {
+                    throw new Error("No se pudo descargar el Excel");
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Movimientos.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                alert("Error: " + error.message);
             }
         });
     </script>
